@@ -135,38 +135,43 @@ turnHoursToMinutes(movies)
 
 function bestYearAvg(moviesArray) {
     if (moviesArray.length === 0) return null;
-  
-    const yearScores = {};
-  
-    for (let movie of moviesArray) {
-      const year = movie.year;
-      const score = typeof movie.score === 'number' ? movie.score : 0;
-  
-      if (!yearScores[year]) {
-        yearScores[year] = [];
-      }
-  
-      yearScores[year].push(score);
+    if (moviesArray.length === 1) {
+      return `The best year was ${moviesArray[0].year} with an average score of ${moviesArray[0].score}`;
     }
   
+    // Objeto para almacenar años con sus puntajes totales y conteos
+    const yearData = {};
+  
+    // Procesar todas las películas para acumular datos por año
+    moviesArray.forEach(movie => {
+      if (!yearData[movie.year]) {
+        yearData[movie.year] = {
+          totalScore: movie.score,
+          count: 1
+        };
+      } else {
+        yearData[movie.year].totalScore += movie.score;
+        yearData[movie.year].count += 1;
+      }
+    });
+  
+    // Calcular promedios y encontrar el mejor año
     let bestYear = null;
-    let bestAvg = 0;
+    let bestAvg = -Infinity;
   
-    for (let year in yearScores) {
-      const scores = yearScores[year];
-      const avg = scores.reduce((sum, score) => sum + score, 0) / scores.length;
-  
-      if (
-        bestYear === null ||
-        avg > bestAvg ||
-        (avg === bestAvg && Number(year) < bestYear)
-      ) {
+    for (const year in yearData) {
+      const avg = yearData[year].totalScore / yearData[year].count;
+      
+      if (avg > bestAvg) {
         bestAvg = avg;
-        bestYear = Number(year); // ✅ aseguramos que sea número
+        bestYear = year;
+      } else if (avg === bestAvg) {
+        // En caso de empate, seleccionar el año más antiguo
+        if (parseInt(year) < parseInt(bestYear)) {
+          bestYear = year;
+        }
       }
     }
   
-    return `The best year was ${bestYear} with an average score of ${bestAvg.toFixed(1)}`;
+    return `The best year was ${bestYear} with an average score of ${bestAvg}`;
   }
-
-  bestYearAvg(movies)
